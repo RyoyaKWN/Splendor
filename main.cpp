@@ -1,25 +1,3 @@
-// #include "Game.hpp"
-// #include <iostream>
-
-// int main() {
-//     std::cout << "Splendorへようこそ!" << std::endl;
-
-//     int numPlayers;
-//     do {
-//         std::cout << "ゲームをプレイする人数を選択（2~4人）: ";
-//         std::cin >> numPlayers;
-//     } while (numPlayers < 2 || numPlayers > 4); // 無効な入力を弾くためのループ
-
-//     Game game(numPlayers); // ゲームの初期化。必要に応じてプレイヤー数をコンストラクタに渡す。
-
-//     game.Play(); // ゲームの開始。このメソッド内でゲームのメインループや勝敗判定などが行われると仮定。
-
-//     std::cout << "Game Over!" << std::endl;
-//     // 必要に応じてさらに結果表示や後処理を追加。
-
-//     return 0;
-// }
-
 #include <iostream>
 #include <cstdio>
 #include <cstdlib>
@@ -53,16 +31,8 @@ int main(int argc, char* argv[]){
                 break;
             }
             currentScene->update(e);
-        //     if(e.type == SDL_MOUSEBUTTONDOWN || e.type == SDL_MOUSEMOTION){
-        //         eventFound = true;
-        //         break;
-        //     }
-        // }
-        // if(!eventFound){
-        //     SDL_WaitEventTimeout(&e, 10); // 少し待ってから次のイベントをポーリング
         }
-        // std::cout << currentScene << std::endl;
-
+        
         // 描画
         sdlHelper.clear();
         currentScene->render(sdlHelper.getRenderer());
