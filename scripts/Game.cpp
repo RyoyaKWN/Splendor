@@ -245,7 +245,6 @@ void Game::reserveCard(int index){
         availableTokens[COLOR::GOLD]--;
     }
     replenishCard(index);
-    // nextTurn();
 }
 
 void Game::replenishCard(int index){
@@ -271,7 +270,6 @@ void Game::takeNobleTile(){
     for(const auto& noble : fieldTiles){
             if(currentPlayer.canReceiveNobleTile(noble)){
                 currentPlayer.addNobleTile(noble);
-                // std::cout << "Player" << currentPlayerIndex+1 << "は貴族タイルを獲得しました！" << " 威信点+3" << std::endl;
                 fieldTiles.erase(std::remove(fieldTiles.begin(), fieldTiles.end(), noble), fieldTiles.end());
             }
     }

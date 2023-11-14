@@ -1,11 +1,11 @@
 #ifndef TOKEN_HPP
 #define TOKEN_HPP
-//* トークンに関するデータ・関数
 
 #include <SDL2\SDL.h>
 #include <string>
 #include <vector>
 
+//* トークンに関するデータ・関数
 class Token{
 public:
     enum Color{

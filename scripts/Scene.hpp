@@ -1,12 +1,9 @@
 #ifndef SCENE_HPP
 #define SCENE_HPP
 
-// #pragma once
-
 #include <SDL2/SDL.h>
 #include "SDLHelper.hpp"
 #include "Button.hpp"
-// #include "Game.hpp"
 #include "Player.hpp"
 #include "Card.hpp"
 #include "NobleTile.hpp"
@@ -14,7 +11,7 @@
 #include <vector>
 #include <list>
 
-
+//* シーンの描画に関する関数
 class Scene{
 public:
     virtual ~Scene() = default;
@@ -45,12 +42,12 @@ public:
 
 private:
     SDLHelper& helper;
-    std::vector<RadioButton*> radioButtons;
-    Button* startButton;
+    std::vector<RadioButton*> radioButtons; //人数選択ボタン
+    Button* startButton; //ゲームスタートボタン
     int selectedPlayerCount;
     bool changeScene;
-    SDL_Texture* titleTexture;
-    SDL_Texture* subtitleTexture;
+    SDL_Texture* titleTexture; //"Splendor"
+    SDL_Texture* subtitleTexture; //"宝石の煌めき"
 };
 
 
@@ -104,23 +101,23 @@ public:
 private:
     SDLHelper& helper;
     Game* game;
-    Player currentPlayer;
-    std::string message;
-    bool actionBind = false;
-    bool isGameOver = false;
-    SDL_Texture* result;
+    Player currentPlayer; //行動中のプレイヤー
+    std::string message; //左下に表示するメッセージ
+    bool actionBind = false; //特定の領域以外の操作を受け付けない
+    bool isGameOver = false; //ゲーム終了判定
+    SDL_Texture* result; //"プレイヤーXの勝利！"
     
     std::vector<Card> fieldCards;
+    std::vector<RadioButton*> cardsRadio; //場のカード
     std::vector<Token::Color> availableTokens;
+    std::vector<RadioButton*> tokenRadio; //場の宝石トークン
     std::vector<Card> reservedCards;
-    std::vector<RadioButton*> cardsRadio;
-    std::vector<RadioButton*> tokenRadio;
-    std::vector<RadioButton*> reservedCardsRadio;
+    std::vector<RadioButton*> reservedCardsRadio; //予約カード
     
-    int selectCardIndex = -1;
-    std::list<int> selectToken = {};
-    int selectReservedCardIndex = -1;
-    std::vector<int> selectExcessToken = {0, 0, 0, 0, 0};
+    int selectCardIndex = -1; //選択中のカード
+    std::list<int> selectToken = {}; //選択中の宝石トークン
+    int selectReservedCardIndex = -1; //選択中の予約カード
+    std::vector<int> selectExcessToken = {0, 0, 0, 0, 0}; //選択中の宝石トークン(返却時)
 
     std::pair<Button*, bool> actionButton1;
     std::pair<Button*, bool> actionButton2;

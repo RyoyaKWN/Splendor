@@ -782,4 +782,4 @@ void GameScene::gameOver(int winner) {
     result = helper.renderText(winnerText, GOLD, 100);
 }
 
-//////// トークンを複数選択→ひとつ選択にしたとき条件を満たしていてもアクションボタン２が有効にならない
+//////// トークンを複数選択→ひとつ選択にしたとき,条件を満たしていてもアクションボタン２が有効にならない

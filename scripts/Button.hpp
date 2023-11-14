@@ -1,14 +1,13 @@
 #ifndef BUTTON_HPP
 #define BUTTON_HPP
 
-// #pragma once
-
 #include <SDL2/SDL.h>
 #include <string>
 #include <vector>
 
 class SDLHelper;
 
+//* ボタン・ラジオボタンに関するクラス
 class Button{
 public:
     enum class Shape{

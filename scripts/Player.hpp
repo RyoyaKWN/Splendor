@@ -1,6 +1,6 @@
 #ifndef PLAYER_HPP
 #define PLAYER_HPP
-//* プレイヤーに関するデータ・関数
+
 #include <map>
 #include <string>
 #include <iostream>
@@ -10,6 +10,7 @@
 #include "Token.hpp"
 #include "NobleTile.hpp"
 
+//* プレイヤーに関するデータ・関数
 class Player {
 public:
     Player();

@@ -1,8 +1,5 @@
 #ifndef SDLHelper_HPP
 #define SDLHelper_HPP
-
-// #pragma once
-
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 #include<string>
