@@ -101,6 +101,7 @@ public:
 private:
     SDLHelper& helper;
     Game* game;
+
     Player currentPlayer; //行動中のプレイヤー
     std::string message; //左下に表示するメッセージ
     bool actionBind = false; //特定の領域以外の操作を受け付けない

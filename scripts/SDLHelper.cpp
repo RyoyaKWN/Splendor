@@ -42,6 +42,7 @@ void SDLHelper::drawText(const std::string& text, SDL_Color color, int fontSize,
     dst.y = y;
     SDL_QueryTexture(textTexture, nullptr, nullptr, &dst.w, &dst.h);
     SDL_RenderCopy(renderer, textTexture, nullptr, &dst);
+    SDL_DestroyTexture(textTexture);
 }
 
 void SDLHelper::drawText(SDL_Texture* textTexture, int x, int y){

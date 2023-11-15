@@ -19,7 +19,6 @@ int main(int argc, char* argv[]){
 
     // タイトルシーン（起動時）
     TitleScene* titleScene = new TitleScene(sdlHelper);
-    // GameScene gameScene(sdlHelper, 3);
     Scene* currentScene = titleScene;
 
     while(!quit){

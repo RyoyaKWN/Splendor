@@ -178,7 +178,7 @@ void GameScene::update(const SDL_Event& e){
     }
 }
 
-bool GameScene::clickCards(int mouseX, int mouseY){
+bool GameScene::clickCards(int mouseX, int mouseY){ //カードクリック時
     bool onMap = false;
     for(int i=0; i < cardsRadio.size(); i++){
         if(cardsRadio[i]->isMouseOver(mouseX, mouseY)){
@@ -213,7 +213,7 @@ bool GameScene::clickCards(int mouseX, int mouseY){
     return onMap;
 }
 
-bool GameScene::clickToken(int mouseX, int mouseY){
+bool GameScene::clickToken(int mouseX, int mouseY){ //トークンクリック時
     bool onMap = false;
     for(int i=0; i< tokenRadio.size(); i++){
         if(tokenRadio[i]->isMouseOver(mouseX, mouseY) && !tokenRadio[i]->isSelected() && selectToken.size() < 3){
@@ -224,6 +224,7 @@ bool GameScene::clickToken(int mouseX, int mouseY){
         }else if(tokenRadio[i]->isMouseOver(mouseX, mouseY) && tokenRadio[i]->isSelected()){
             tokenRadio[i]->deselect();
             selectToken.remove(i);
+            onMap = true;
             break;
         }
     }
@@ -241,7 +242,7 @@ bool GameScene::clickToken(int mouseX, int mouseY){
     return onMap;
 }
 
-bool GameScene::clickReservedCards(int mouseX, int mouseY){
+bool GameScene::clickReservedCards(int mouseX, int mouseY){ //予約カードクリック時
     bool onMap = false;
     for(int i=0; i < reservedCardsRadio.size(); i++){
         if(reservedCardsRadio[i]->isMouseOver(mouseX, mouseY) && !reservedCardsRadio[i]->isSelected()){
@@ -275,10 +276,10 @@ bool GameScene::clickReservedCards(int mouseX, int mouseY){
     return onMap;
 }
 
-void GameScene::clickActionButtons(int mouseX, int mouseY){
+void GameScene::clickActionButtons(int mouseX, int mouseY){ //アクションボタンクリック時
     if(actionButton1.first->isMouseOver(mouseX, mouseY) && actionButton1.second){
         // アクションボタン１を押したときの処理
-        if(selectCardIndex != -1){
+        if(selectCardIndex != -1){ //カードの購入
             game->purchaseFieldCard(selectCardIndex);
             cardsRadio[selectCardIndex]->deselect();
             selectCardIndex = -1;
@@ -288,7 +289,7 @@ void GameScene::clickActionButtons(int mouseX, int mouseY){
             }else{
                 nextTurn();
             }
-        }else if(!selectToken.empty()){
+        }else if(!selectToken.empty()){ //トークンの取得（1枚）
             game->takeTokensOther(selectToken);
             for(int& sT : selectToken){
                 tokenRadio[sT]->deselect();
@@ -304,13 +305,13 @@ void GameScene::clickActionButtons(int mouseX, int mouseY){
         }
     }else if(actionButton2.first->isMouseOver(mouseX, mouseY) && actionButton2.second){
         // アクションボタン２を押したときの処理
-        if(selectCardIndex != -1){
+        if(selectCardIndex != -1){ //カードの予約
             game->reserveCard(selectCardIndex);
             cardsRadio[selectCardIndex]->deselect();
             selectCardIndex = -1;
             invisibleActionButton();
             nextTurn();
-        }else if(!selectToken.empty()){
+        }else if(!selectToken.empty()){ //トークンの取得(2枚)
             game->takeTokensSame(selectToken.back());
             tokenRadio[selectToken.back()]->deselect();
             selectToken.clear();
@@ -328,7 +329,7 @@ void GameScene::clickActionButtons(int mouseX, int mouseY){
             }else{
                 nextTurn();
             }
-        }else if(selectReservedCardIndex != -1){
+        }else if(selectReservedCardIndex != -1){ //予約カードの購入
             game->purchaseReservedCard(selectReservedCardIndex);
             reservedCardsRadio[selectReservedCardIndex]->deselect();
             selectReservedCardIndex = -1;
@@ -358,7 +359,7 @@ void GameScene::clickActionButtons(int mouseX, int mouseY){
     }
 }
 
-void GameScene::clickExcessToken(int mouseX, int mouseY){
+void GameScene::clickExcessToken(int mouseX, int mouseY){ //所持トークン超過のトークン選択クリック時
     bool onMap = false;
     if(cancelButton->isMouseOver(mouseX, mouseY)){
         for(int& token : selectExcessToken){
@@ -369,7 +370,6 @@ void GameScene::clickExcessToken(int mouseX, int mouseY){
         game->returnExcessTokens(selectExcessToken);
         for(int i=0; i<5; i++){
             selectExcessToken[i] = 0;
-            // excessTokenRadio[i]->setInvisibleButton();
         }
         returnButton.first->setInvisibleButton();
         cancelButton->setInvisibleButton();
@@ -390,9 +390,6 @@ void GameScene::clickExcessToken(int mouseX, int mouseY){
 void GameScene::render(SDL_Renderer* renderer){
     currentPlayer = game->getCurrentPlayer();
 
-    // メッセージログを表示
-    renderMessageLog();
-
     // 場のカードを表示
     renderFieldCards();
 
@@ -408,6 +405,9 @@ void GameScene::render(SDL_Renderer* renderer){
     // 現在のターンのプレイヤーの予約カードを表示
     rcpReservedCards(currentPlayer);
 
+    // メッセージログを表示
+    renderMessageLog();
+
     // 行動選択ボタンを表示
     renderActionButtons();
 
@@ -421,8 +421,10 @@ int GameScene::getPlayerCount() const{
     return playerCount;
 }
 
-void GameScene::nextTurn(){
+void GameScene::nextTurn(){ //ターン交代
     game->nextTurn();
+
+    // 予約カードの描画
     reservedCardsRadio.clear();
     reservedCards = game->getCurrentPlayer().getReservedCards();
     for(int i=0; i<reservedCards.size(); i++){
@@ -460,10 +462,12 @@ void GameScene::renderCard(const Card& card, int x, int y) {
     SDL_Color pointColor = (card.getCardColor() != Token::WHITE) ? WHITE : BLACK;
     SDL_Texture* pointTexture = helper.renderText(pointsStr, pointColor, 25);
     helper.drawRect(x, y, cardWidth, cardHeight * 3 / 10, cardColor, pointTexture);
+    SDL_DestroyTexture(pointTexture);
+    pointTexture = nullptr;
     helper.drawRect(x, y + cardHeight * 3 / 10, cardWidth, cardHeight * 7 / 10, {200, 200, 200, 255}, NULL);
 
     // トークンのコストの描画
-    int index = 0; // 描画するトークンが何色目か
+    int index = 0; // 描画するトークンが何色目か(1:RED ,2:GREEN ,3:BLUE ,4:WHITE ,5:BLACK)
     int tokenRadius =  12;
     int tokenMargin = 15;
     int space = 5;
@@ -477,6 +481,8 @@ void GameScene::renderCard(const Card& card, int x, int y) {
             int startX = x + tokenMargin + ( space + 2 * tokenRadius) * ( index / 2 );
             int startY = y + cardHeight - tokenMargin - ( space + 2 * tokenRadius ) * ( index % 2 );
             helper.drawCircle(startX, startY, tokenRadius, costColor, costCountTexture);
+            SDL_DestroyTexture(costCountTexture);
+            costCountTexture = nullptr;
             index++;
         }
     }
@@ -547,6 +553,8 @@ void GameScene::renderNobleTile(const NobleTile& tile, int x, int y) {
             int startX = x + cardMargin + ( space + cardSide) * ( index / 2 );
             int startY = y + tileHeight - cardSide - cardMargin - ( space + cardSide ) * ( index % 2 );
             helper.drawRect(startX, startY, cardSide, cardSide, costColor, costCountTexture);
+            SDL_DestroyTexture(costCountTexture);
+            costCountTexture = nullptr;
             index++;
         }
     }
@@ -580,8 +588,10 @@ void GameScene::renderPlayerInfo(const Player& player, int startY){ // プレイ
     // 威信点
     std::string pointText = std::to_string(player.getPrestigePoints());
     helper.drawText("威信点", GOLD, 15, startX + 345, startY + 10);
-    // helper.drawText(pointText, GOLD, 60, startX + 345, startY + 20);
-    helper.drawRect(startX + 335, startY + 30, 65, 60, TRANSPARENT, helper.renderText(pointText, GOLD, 50));
+    SDL_Texture* pointTexture =  helper.renderText(pointText, GOLD, 50);
+    helper.drawRect(startX + 335, startY + 30, 65, 60, TRANSPARENT, pointTexture);
+    SDL_DestroyTexture(pointTexture);
+    pointTexture = nullptr;
 
     int tokenSpace = 10;
     SDL_Color textColor;
@@ -594,6 +604,8 @@ void GameScene::renderPlayerInfo(const Player& player, int startY){ // プレイ
         textColor = (cardColor == Token::Color::WHITE || cardColor == Token::Color::GOLD) ? BLACK : WHITE;
         SDL_Texture* textTexture = helper.renderText(cardCountText, textColor, 20);
         helper.drawRect(startX + 15 + (tokenSpace + 30) * i , startY + 30, 30, 30, cardColorSDL, textTexture);
+        SDL_DestroyTexture(textTexture);
+        textTexture = nullptr;
     }
 
     // 宝石トークン
@@ -605,6 +617,8 @@ void GameScene::renderPlayerInfo(const Player& player, int startY){ // プレイ
         textColor = (tokenColor == Token::Color::WHITE || tokenColor == Token::Color::GOLD) ? BLACK : WHITE;
         SDL_Texture* textTexture = helper.renderText(tokenCountText, textColor, 20);
         helper.drawCircle(startX + 30 + (tokenSpace + 30) * i , startY + 80, 15, tokenColorSDL, textTexture);
+        SDL_DestroyTexture(textTexture);
+        textTexture = nullptr;
     }
 
     // 予約カード枚数
@@ -647,10 +661,11 @@ void GameScene::renderAvailableTokens() { // 利用可能なトークンの数�
             tokenRadio[i]->render();
         }
         helper.drawCircle(405, 50 + 60 * i, 20, tokenColorSDL, textTexture);
+        SDL_DestroyTexture(textTexture);
     }
 }
 
-void GameScene::renderActionButtons() {
+void GameScene::renderActionButtons() { // アクションボタンを描画
     cancelButton->setButton("キャンセル", 400, 490, 130, 30, {150, 150, 150, 255}, WHITE, 20);
     bool isSelect = false;
 
@@ -668,7 +683,7 @@ void GameScene::renderActionButtons() {
     }
 }
 
-void GameScene::fieldCardAction() {
+void GameScene::fieldCardAction() { // カード選択時（場）
     Card& selectCard = fieldCards[selectCardIndex];
 
     if(currentPlayer.isPurchasable(selectCard)){
@@ -688,7 +703,7 @@ void GameScene::fieldCardAction() {
     }
 }
 
-void GameScene::tokenAction(){
+void GameScene::tokenAction(){ // トークン選択時
     bool isTakable = true;
     // 3色までを1枚ずつ取得
     for(int& token : selectToken){
@@ -755,6 +770,8 @@ void GameScene::returnExcessToken() {
 
         excessTokenRadio[i]->render();
         helper.drawCircle(405 + 60 * (i % 3), 415 + 45 * (i / 3), 18, tokenColorSDL, textTexture);
+        SDL_DestroyTexture(textTexture);
+        textTexture = nullptr;
     }
 
     int selectCount = 0;
@@ -781,5 +798,3 @@ void GameScene::gameOver(int winner) {
     std::string winnerText = "プレイヤー" + std::to_string(winner + 1) + "の勝利！";
     result = helper.renderText(winnerText, GOLD, 100);
 }
-
-//////// トークンを複数選択→ひとつ選択にしたとき,条件を満たしていてもアクションボタン２が有効にならない
