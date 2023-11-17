@@ -17,8 +17,8 @@ const int SCREEN_HEIGHT = 540;
 
 TitleScene::TitleScene(SDLHelper& sdlHelper) : helper(sdlHelper), changeScene(false), selectedPlayerCount(2){
     //タイトル
-    titleTexture = helper.renderText("Splendor", GOLD, 100);
-    subtitleTexture = helper.renderText("宝石の煌めき", GOLD, 50);
+    titleTexture = helper.getCachedTexture("Splendor", GOLD, 100);
+    subtitleTexture = helper.getCachedTexture("宝石の煌めき", GOLD, 50);
     
     // プレイヤー選択のボタンサイズ
     const int buttonWidth = 150;
@@ -414,7 +414,9 @@ void GameScene::render(SDL_Renderer* renderer){
     // 取得トークン超過時、返却ボタンを表示
     if(actionBind && !isGameOver) returnExcessToken();
 
-    if(isGameOver) helper.drawText(result, 0, 200);
+    if(isGameOver){
+        helper.drawText(result, 0, 200);
+    }
 }
 
 int GameScene::getPlayerCount() const{
@@ -423,7 +425,6 @@ int GameScene::getPlayerCount() const{
 
 void GameScene::nextTurn(){ //ターン交代
     game->nextTurn();
-
     // 予約カードの描画
     reservedCardsRadio.clear();
     reservedCards = game->getCurrentPlayer().getReservedCards();
@@ -443,7 +444,9 @@ Scene* GameScene::getNextScene(){
 }
 
 void GameScene::renderMessageLog() { // メッセージログを描画
-    helper.drawText(message, WHITE, 25, 30, 485);
+    SDL_Texture* textTexture = helper.getCachedTexture(message, WHITE, 25);
+    helper.drawText(textTexture, 30, 485);
+    // helper.drawText(message, WHITE, 25, 30, 485);
 }
 
 void GameScene::renderCard(const Card& card, int x, int y) {
@@ -495,7 +498,8 @@ void GameScene::renderFieldCards() { // 場に出ているカードの情報を�
 
     for(int i=3; i>=1; i--){
         std::string levelText = "レベル" + std::to_string(i);
-        helper.drawText(levelText, WHITE, 17, 15, 305 - 120 * (i-1));
+        SDL_Texture* levelTextCache = helper.getCachedTexture(levelText, WHITE, 17); 
+        helper.drawText(levelTextCache, 15, 305 - 120 * (i-1));
 
         fieldCards = game->getfieldCards();
         for(int j=0; j<4; j++){
@@ -513,9 +517,10 @@ void GameScene::rcpReservedCards(const Player& player) { // 予約している�
     helper.drawRect(444, 30, 100, 360, {150, 150, 150, 255}, NULL);
 
     // 現在のターンのプレイヤー、文字を描画
-    helper.drawText("予約カード", WHITE, 18, 449, 30);
+    helper.drawText(helper.getCachedTexture("予約カード", WHITE, 18), 449, 30);
     std::string currentPlayerText = "プレイヤー" + std::to_string(currentPlayer.getNumber());
-    helper.drawText(currentPlayerText, WHITE, 16, 449, 55);
+    SDL_Texture* cpCache = helper.getCachedTexture(currentPlayerText, WHITE, 16);
+    helper.drawText(cpCache, 449, 55);
 
     // 予約カードの描画
     for(int i=0; i<reservedCards.size(); i++){
@@ -535,8 +540,7 @@ void GameScene::renderNobleTile(const NobleTile& tile, int x, int y) {
     helper.drawRect(x, y, tileWidth, tileHeight, tileColor, NULL);
     
     // 威信点の描画
-    std::string pointsStr = "3";
-    helper.drawText(pointsStr, BLACK, 25, x + 5, y);
+    helper.drawText(helper.getCachedTexture("3", BLACK, 25), x + 5, y);
 
     // トークンのコストの描画
     int index = 0; // 描画するトークンが何色目か
@@ -583,11 +587,11 @@ void GameScene::renderPlayerInfo(const Player& player, int startY){ // プレイ
 
     // プレイヤーインデックス
     std::string playerText = "プレイヤー" + std::to_string(player.getNumber());
-    helper.drawText(playerText, WHITE, 20, startX + 5, startY);
+    helper.drawText(helper.getCachedTexture(playerText, WHITE, 20), startX + 5, startY);
 
     // 威信点
     std::string pointText = std::to_string(player.getPrestigePoints());
-    helper.drawText("威信点", GOLD, 15, startX + 345, startY + 10);
+    helper.drawText(helper.getCachedTexture("威信点", GOLD, 15), startX + 345, startY + 10);
     SDL_Texture* pointTexture =  helper.renderText(pointText, GOLD, 50);
     helper.drawRect(startX + 335, startY + 30, 65, 60, TRANSPARENT, pointTexture);
     SDL_DestroyTexture(pointTexture);
@@ -623,14 +627,14 @@ void GameScene::renderPlayerInfo(const Player& player, int startY){ // プレイ
 
     // 予約カード枚数
     std::string reservedCardCount = std::to_string(player.getReservedCards().size());
-    helper.drawText("予約", WHITE, 15, startX + 260, startY + 20);
-    helper.drawText(reservedCardCount, WHITE, 40, startX + 262, startY + 40);
+    helper.drawText(helper.getCachedTexture("予約", WHITE, 15), startX + 260, startY + 20);
+    helper.drawText(helper.getCachedTexture(reservedCardCount, WHITE, 40), startX + 262, startY + 40);
 
 
     // 取得貴族タイル枚数
     std::string tileCount = std::to_string(player.getOwnedNobleTiles().size());
-    helper.drawText("貴族", WHITE, 15, startX + 300, startY + 20);
-    helper.drawText(tileCount, WHITE, 40, startX + 304, startY + 40);
+    helper.drawText(helper.getCachedTexture("貴族", WHITE, 15), startX + 300, startY + 20);
+    helper.drawText(helper.getCachedTexture(tileCount, WHITE, 40), startX + 304, startY + 40);
 
 }
 
@@ -662,6 +666,7 @@ void GameScene::renderAvailableTokens() { // 利用可能なトークンの数�
         }
         helper.drawCircle(405, 50 + 60 * i, 20, tokenColorSDL, textTexture);
         SDL_DestroyTexture(textTexture);
+        textTexture = nullptr;
     }
 }
 
@@ -796,5 +801,5 @@ void GameScene::gameOver(int winner) {
     isGameOver = true;
     message = "ゲーム終了！";
     std::string winnerText = "プレイヤー" + std::to_string(winner + 1) + "の勝利！";
-    result = helper.renderText(winnerText, GOLD, 100);
+    result = helper.getCachedTexture(winnerText, GOLD, 100);
 }

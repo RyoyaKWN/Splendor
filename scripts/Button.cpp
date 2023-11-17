@@ -10,14 +10,14 @@ Button::Button(SDLHelper& helper, const std::string& text, int x, int y, int wid
     currentColor = defaultColor;
  
     // ボタンのテキストをテクスチャとして作成
-    textTexture = sdlHelper.renderText(text, textColor, fontSize);
+    textTexture = sdlHelper.getCachedTexture(text, textColor, fontSize);
 }
 
 Button::Button(SDLHelper& helper, const std::string& text, int x, int y, int radius, SDL_Color defaultColor, SDL_Color textColor, int fontSize)
     : sdlHelper(helper), rect{x - radius, y - radius, radius * 2, radius * 2}, radius(radius), defaultColor(defaultColor), shape(Shape::CIRCLE) {
 
     // ボタンのテキストをテクスチャとして作成
-    textTexture = sdlHelper.renderText(text, textColor, fontSize);
+    textTexture = sdlHelper.getCachedTexture(text, textColor, fontSize);
 }
 
 Button::Button(SDLHelper& helper) : sdlHelper(helper){
@@ -26,7 +26,7 @@ Button::Button(SDLHelper& helper) : sdlHelper(helper){
 }
 
 void Button::setButton(const std::string& text, int x, int y, int width, int height, SDL_Color defColor, SDL_Color textColor, int fontSize){
-    textTexture = sdlHelper.renderText(text, textColor, fontSize);
+    textTexture = sdlHelper.getCachedTexture(text, textColor, fontSize);
     rect = {x, y, width, height};
     currentColor = defColor;
     shape = Shape::RECTANGLE;
@@ -43,8 +43,6 @@ void Button::render(){
     }else if(shape == Shape::CIRCLE){
         sdlHelper.drawCircle(rect.x + radius, rect.y + radius, radius, currentColor, textTexture);
     }
-
-    // sdlHelper.drawTextCenter(textTexture, rect);
 }
 
 bool Button::isMouseOver(int mouseX, int mouseY){
@@ -109,7 +107,6 @@ void RadioButton::select(){
 void RadioButton::deselect(){
     selected = false;
     currentColor = defaultColor;
-    // std::cout << "oh" << std::endl;
 }
 
 bool RadioButton::isSelected() const {

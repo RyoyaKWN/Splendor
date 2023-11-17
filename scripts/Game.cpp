@@ -200,7 +200,7 @@ void Game::purchaseFieldCard(int index){
     takeNobleTile();
 }
 
-void Game::purchaseReservedCard(int index){
+void Game::purchaseReservedCard(int index){ //バグ：予約カード購入時エラーが発生することがある
     Player& currentPlayer = getCurrentPlayer();
     Card& card = currentPlayer.getReservedCards()[index];
 
@@ -261,7 +261,7 @@ void Game::replenishCard(int index){
     }else if(index >= 8 && index < 12){
         rnd = rand() % deckLvl1.size();
         fieldCards[index] = deckLvl1[rnd];
-        deckLvl1.erase(deckLvl3.begin() + rnd);
+        deckLvl1.erase(deckLvl1.begin() + rnd);
     }
 }
 
@@ -270,7 +270,7 @@ void Game::takeNobleTile(){
     for(const auto& noble : fieldTiles){
             if(currentPlayer.canReceiveNobleTile(noble)){
                 currentPlayer.addNobleTile(noble);
-                fieldTiles.erase(std::remove(fieldTiles.begin(), fieldTiles.end(), noble), fieldTiles.end());
+                fieldTiles.erase(std::remove(fieldTiles.begin(), fieldTiles.end(), noble));
             }
     }
 

@@ -12,17 +12,29 @@ SDLHelper::SDLHelper(const std::string& windowTitle, int width, int height){
 }
 
 SDLHelper::~SDLHelper(){
+    clearTextureCache();
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     TTF_Quit();
     SDL_Quit();
 }
 
-SDL_Texture* SDLHelper::loadTexture(){
-    SDL_Surface* loadedSurface = SDL_LoadBMP(FONT_PATH);
-    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, loadedSurface);
-    SDL_FreeSurface(loadedSurface);
-    return texture;
+SDL_Texture* SDLHelper::getCachedTexture(const std::string& text, SDL_Color color, int fontSize){
+    std::string key = text + std::to_string(color.r) + std::to_string(color.r) + std::to_string(color.g) + std::to_string(color.b) + std::to_string(fontSize);
+    auto it = textureCache.find(key);
+    if(it == textureCache.end()){
+        SDL_Texture* newTexture = renderText(text, color, fontSize);
+        textureCache[key] = newTexture;
+        return newTexture;
+    }
+    return it->second;
+}
+
+void SDLHelper::clearTextureCache(){
+    for(auto& pair : textureCache){
+        SDL_DestroyTexture(pair.second);
+    }
+    textureCache.clear();
 }
 
 SDL_Texture* SDLHelper::renderText(const std::string& text, SDL_Color color, int fontSize){
@@ -35,14 +47,15 @@ SDL_Texture* SDLHelper::renderText(const std::string& text, SDL_Color color, int
 }
 
 void SDLHelper::drawText(const std::string& text, SDL_Color color, int fontSize, int x, int y){
-    SDL_Texture* textTexture = renderText(text, color, fontSize);
+    SDL_Texture* textTexture = getCachedTexture(text, color, fontSize);
+    // SDL_Texture* textTexture = renderText(text, color, fontSize);
 
     SDL_Rect dst;
     dst.x = x;
     dst.y = y;
     SDL_QueryTexture(textTexture, nullptr, nullptr, &dst.w, &dst.h);
     SDL_RenderCopy(renderer, textTexture, nullptr, &dst);
-    SDL_DestroyTexture(textTexture);
+    // SDL_DestroyTexture(textTexture);
 }
 
 void SDLHelper::drawText(SDL_Texture* textTexture, int x, int y){
@@ -60,7 +73,9 @@ void SDLHelper::drawRect(int x, int y, int width, int height, SDL_Color color, S
     SDL_RenderFillRect(renderer, &rect);
 
     // 矩形の中心にテキスト
-    drawTextCenter(textTexture, rect);
+    if(textTexture != nullptr){
+        drawTextCenter(textTexture, rect);
+    }
 }
 
 void SDLHelper::drawCircle(int x, int y, int r, SDL_Color color, SDL_Texture* textTexture){
@@ -75,7 +90,10 @@ void SDLHelper::drawCircle(int x, int y, int r, SDL_Color color, SDL_Texture* te
     }
 
     // 円の中心にテキスト
-    drawTextCenter(textTexture, {x, y, 0, 0});
+    if(textTexture != nullptr){
+        drawTextCenter(textTexture, {x, y, 0, 0});
+        SDL_DestroyTexture(textTexture);
+    }
 }
 
 void SDLHelper::drawTextCenter(SDL_Texture* textTexture, SDL_Rect rect){

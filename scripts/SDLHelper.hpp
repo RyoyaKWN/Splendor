@@ -3,14 +3,16 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 #include<string>
+#include<map>
 
 class SDLHelper{
 public:
     SDLHelper(const std::string& windowTitle, int width, int Height);
     ~SDLHelper();
 
-    // テクスチャの読み込み
-    SDL_Texture* loadTexture();
+    // テクスチャのキャッシュ
+    SDL_Texture* getCachedTexture(const std::string& text, SDL_Color color, int fontSize);
+    void clearTextureCache();
 
     // テキストを描画
     SDL_Texture* renderText(const std::string& text, SDL_Color color, int fontSize);
@@ -36,6 +38,7 @@ public:
     SDL_Renderer* getRenderer();
 
 private:
+    std::map<std::string, SDL_Texture*> textureCache;
     SDL_Window* window;
     SDL_Renderer* renderer;
 };

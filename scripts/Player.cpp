@@ -105,7 +105,7 @@ bool Player::canReceiveNobleTile(const NobleTile& tile) const{
     for(const auto& pair : tile.getRequiredCards()){
         Token::Color color = pair.first;
         int requiredCount = pair.second;
-        if(getCardTokenCount(color) < requiredCount){
+        if(getCardTokenCount(color) < requiredCount){//バグ：貴族タイル取得が複数回実行される
             return false;
         }
     }
